@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div id="DisplayOutput"></div>
+    <script>
+        let DisplayOutput = document.getElementById('DisplayOutput');
+
+        let users = [{
+            id: 4,
+            dateTime: new Date(2023, 10, 20, 0, 15, 0),
+            type: 'login'
+        }, {
+            id: 2,
+            dateTime: new Date(2023, 10, 20, 1, 20, 0),
+            type: 'logout'
+        }, {
+            id: 3,
+            dateTime: new Date(2023, 10, 20, 1, 40, 0),
+            type: 'login'
+        }, {
+            id: 1,
+            dateTime: new Date(2023, 10, 20, 2, 50, 0),
+            type: 'login'
+        }, {
+            id: 4,
+            dateTime: new Date(2023, 10, 20, 3, 30, 0),
+            type: 'logout'
+        }, {
+            id: 1,
+            dateTime: new Date(2023, 10, 20, 3, 59, 0),
+            type: 'logout'
+        }, {
+            id: 3,
+            dateTime: new Date(2023, 10, 20, 7, 28, 0),
+            type: 'logout'
+        }, {
+            id: 5,
+            dateTime: new Date(2023, 10, 20, 8, 30, 0),
+            type: 'login'
+        }, {
+            id: 19,
+            dateTime: new Date(2023, 10, 20, 9, 18, 0),
+            type: 'logout'
+        }, {
+            id: 10,
+            dateTime: new Date(2023, 10, 20, 9, 19, 0),
+            type: 'login'
+        }, {
+            id: 2,
+            dateTime: new Date(2023, 10, 20, 11, 1, 0),
+            type: 'login'
+        }, {
+            id: 8,
+            dateTime: new Date(2023, 10, 20, 17, 1, 0),
+            type: 'login'
+        }, {
+            id: 12,
+            dateTime: new Date(2023, 10, 20, 20, 1, 0),
+            type: 'login'
+        }, {
+            id: 5,
+            dateTime: new Date(2023, 10, 20, 22, 48, 0),
+            type: 'logout'
+        }, {
+            id: 2,
+            dateTime: new Date(2023, 10, 20, 23, 45, 0),
+            type: 'logout'
+        }];
+
+        function calculateLoginLogoutData() {
+            let start = new Date(2023, 10, 20, 0, 0, 0);
+            let end = new Date(start.getTime() + 60 * 60 * 1000);
+
+            for (let i = 0; i < 24; i++) {
+                if (i !== 0) {
+                    start = end;
+                    end = new Date(start.getTime() + 60 * 60 * 1000);
+                }
+
+                let loggedUsers = users.filter((e) => (
+                    (e.dateTime > start && e.dateTime < end) ||
+                    e.dateTime.getTime() === start.getTime() ||
+                    e.dateTime.getTime() === end.getTime()
+                ));
+
+                let futureUsers = getFutureLoggedUsers(end);
+                let pastUsers = getPastLoggedUsers(start);
+
+                let output = loggedUsers.concat(futureUsers, pastUsers);
+
+                let outputData = [...new Set(output.map((e) => e.id))].toString();
+                DisplayOutput.innerHTML += `${start.getHours()}-${end.getHours()}:{ ${outputData}}<br>`;
+            }
+
+            function getFutureLoggedUsers(end) {
+                let _users = users.filter((e) => e.dateTime > end);
+
+                let loggedUsers = {};
+                let logotOutUsers = {};
+
+                _users.forEach((e) => {
+                    if (e.type === 'login') {
+                        if (!logotOutUsers[e.id]) {
+                            loggedUsers[e.id] = e;
+                        }
+                    } else {
+                        if (!logotOutUsers[e.id]) {
+                            logotOutUsers[e.id] = e;
+                        }
+                    }
+                });
+
+                console.log
+                let commonKeys = Object.keys(loggedUsers).filter((key) => logotOutUsers[key]);
+
+                return Object.entries(logotOutUsers)
+                    .filter(([key]) => !commonKeys.includes(key))
+                    .map((entry) => entry[1]);
+            }
+
+            function getPastLoggedUsers(start) {
+                let _users = users.filter((e) => e.dateTime < start);
+
+                let loggedUsers = {};
+                let logotOutUsers = {};
+
+                _users.forEach((e) => {
+                    if (e.type === 'login') {
+                        if (!loggedUsers[e.id]) {
+                            loggedUsers[e.id] = e;
+                        }
+                    } else {
+                        if (!logotOutUsers[e.id]) {
+                            logotOutUsers[e.id] = e;
+                        }
+                    }
+                });
+
+                let commonKeys = Object.keys(logotOutUsers).filter((key) => loggedUsers[key]);
+
+                return Object.entries(loggedUsers)
+                    .filter(([key]) => !commonKeys.includes(key))
+                    .map((entry) => entry[1]);
+            }
+        }
+
+        calculateLoginLogoutData();
+    </script>
+</body>
+
+</html>
